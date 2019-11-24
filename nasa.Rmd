@@ -9,10 +9,12 @@ output:
 ---
 # Introduction
 
-NeoWs (Near Earth Object Web Service) is a RESTful web service for near earth Asteroid information. With NeoWs a user can: search for Asteroids based on their closest approach date to Earth, lookup a specific Asteroid with its NASA JPL small body id, as well as browse the overall data-set.[^1] In this report, I use NeoWs API to get overall data-set of asteroids. And the analysis will be around two variables and how they related:
+NeoWs (Near Earth Object Web Service) is a RESTful web service for near earth Asteroid information. With NeoWs a user can: search for Asteroids based on their closest approach date to Earth, lookup a specific Asteroid with its NASA JPL small body id, as well as browse the overall data-set.[^1] In this report, I use NeoWs API to get overall data-set of asteroids. And the analysis will be around two variables:
 
 - Magnitude of asteroids
 - Is potential hazardous asteroids
+
+As stated on the NASA websites:all asteroids with a minimum orbit intersection distance (MOID) of 0.05 au or less and an absolute magnitude (H) of 22.0 or less are considered PHAs.[^2] Here, I did a simple confimation of the statement on the relationship bewteen the absolute magnitude and PHAs from the actual dataset. 
 
 ```{r setup, include=FALSE}
 # Set global options
@@ -30,9 +32,7 @@ options(width = 70, digits = 2, scipen = 7)
 #load required packages
 library(tidyverse)
 library(httr)
-library(broom)
 library(modelr)
-library(knitr)
 
 #set default theme and modify the font size
 theme_set(theme_bw(base_size = 10))
@@ -59,6 +59,8 @@ asteroid <-
 To get an overview of the near earth asteroids, I plot the distribution and number of magnitude and hazardousness seperately.
  
 ## Magnitude 
+**H (absolute magnitude)**:An asteroid’s absolute magnitude is the visual magnitude an observer would record if the asteroid were placed 1 Astronomical Unit (au) away, and 1 au from the Sun and at a zero phase angle.[^3] In short,the absolute magnitude of an astronomical object is a measure of its intrinsic light output, independent of its distance. 
+
 ```{r}
 #count the magnitude
 asteroid %>%
@@ -69,6 +71,61 @@ asteroid %>%
        caption = "Source:NASA JPL Asteroid team")
 ```
 
-## Hazardousness
+The graph suggests that the absolute magnitude of near earth asteroids is between 15-27.
 
-[^1]: “Asteroids - NeoWs API.” Nasa open data portal, July 19, 2018. https://data.nasa.gov/Space-Science/Asteroids-NeoWs-API/73uw-d9i8.
+## Hazardousness
+**PHA (Potentially Hazardous Asteroid)**:Potentially Hazardous Asteroids (PHAs) are currently defined based on parameters that measure the asteroid’s potential to make threatening close approaches to the Earth. [^4]
+
+```{r}
+#count the hazardousness
+asteroid %>%
+  count(is_potentially_hazardous_asteroid)%>%
+  ggplot(aes(is_potentially_hazardous_asteroid, n))+
+  geom_col(width = 0.3)+
+  geom_text(aes(label = n),vjust = "top", color= "white")+
+  labs(x = "Hazardousness of asteroids",
+       y = "Number",
+       caption = "Source:NASA JPL Asteroid team")
+```
+
+The graph suggests, only 2 of the near earth asteroids are considered hazardous. 
+
+# Relationship
+To confirm the stated reltionship between the magnitude and hazardousness, here, I put them into the same plot.
+```{r}
+asteroid %>%
+  ggplot(aes(is_potentially_hazardous_asteroid, absolute_magnitude_h))+
+  geom_boxplot()+
+  labs(x = "Hazardousness of asteroids",
+       y = "Magnitude of asteroids",
+       caption = "Source:NASA JPL Asteroid team")
+```
+
+From the graph, it is true that all the hazardousness asteroids are below the absolute magnitude (H) of 22.0. But not all asteroids that are not considered hazarous are over the absolute magnitude (H) of 22.0, this is because some of the asteroids below the absolute magnitude (H) of 22.0 may not have a minimum orbit intersection distance (MOID) of 0.5 or less.
+
+# Conclusion 
+Overall, we prove that the smaller absolute magnitude of an asteorid is, the more likely it is a potentially hazardous asteroid. This relationship can be identified in the graph below:
+```{r}
+asteroid %>%
+  mutate(is_potentially_hazardous_asteroid = as.numeric(is_potentially_hazardous_asteroid))%>% 
+  ggplot(aes(absolute_magnitude_h, is_potentially_hazardous_asteroid))+
+   scale_y_continuous(labels = scales::percent)+
+   geom_smooth(method = "glm",
+              method.args = list(family = "binomial"),
+              se = FALSE)+
+  labs(x = "Absolute Magnitude",
+       y = "Probability of being hazardous",
+       caption = "Source:NASA JPL Asteroid team")
+
+```
+
+
+
+[^1]: "Asteroids - NeoWs API.", Nasa open data portal, July 19, 2018. https://data.nasa.gov/Space-Science/Asteroids-NeoWs-API/73uw-d9i8.
+[^2]: "Glossary - PHA (Potentially Hazardous Asteroid)", Jet Propulsion Lab
+https://cneos.jpl.nasa.gov/glossary/PHA.html
+[^3]: "Glossary - H (absolute magnitude)", Jet Propulsion Lab
+https://cneos.jpl.nasa.gov/glossary/h.html
+[^4]: "Glossary - PHA (Potentially Hazardous Asteroid)", Jet Propulsion Lab
+https://cneos.jpl.nasa.gov/glossary/PHA.html
+
