@@ -14,7 +14,7 @@ NeoWs (Near Earth Object Web Service) is a RESTful web service for near earth As
 - Magnitude of asteroids
 - Is potential hazardous asteroids
 
-As stated on the NASA websites:all asteroids with a minimum orbit intersection distance (MOID) of 0.05 au or less and an absolute magnitude (H) of 22.0 or less are considered PHAs.[^2] Here, I did a simple confimation of the statement on the relationship bewteen the absolute magnitude and PHAs from the actual dataset. 
+As stated on the NASA websites:all asteroids with a minimum orbit intersection distance (MOID) of 0.05 au or less and an absolute magnitude (H) of 22.0 or less are considered PHAs.[^2] Here,a confirmation and extension of the statement on the relationship between the absolute magnitude and PHAs from the actual data set is demonstrated. 
 
 ```{r setup, include=FALSE}
 # Set global options
@@ -24,10 +24,8 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE,
                       fig.width = 6,
                       fig.asp = 0.618,
                       fig.align = "center",
-                      out.width = "80%") 
-# Set numerical output display parameters
-options(width = 70, digits = 2, scipen = 7)
-
+                      out.width = "50%",
+                      out.height = "50%")
 
 #load required packages
 library(tidyverse)
@@ -56,7 +54,7 @@ asteroid <-
 ```
 
 # Overview 
-To get an overview of the near earth asteroids, I plot the distribution and number of magnitude and hazardousness seperately.
+To get an overview of the near earth asteroids, I plot the distribution and number of magnitude and hazardousness separately.
  
 ## Magnitude 
 **H (absolute magnitude)**:An asteroid’s absolute magnitude is the visual magnitude an observer would record if the asteroid were placed 1 Astronomical Unit (au) away, and 1 au from the Sun and at a zero phase angle.[^3] In short,the absolute magnitude of an astronomical object is a measure of its intrinsic light output, independent of its distance. 
@@ -83,7 +81,7 @@ asteroid %>%
   ggplot(aes(is_potentially_hazardous_asteroid, n))+
   geom_col(width = 0.3)+
   geom_text(aes(label = n),vjust = "top", color= "white")+
-  labs(x = "Hazardousness of asteroids",
+  labs(x = "Haphazardness of asteroids",
        y = "Number",
        caption = "Source:NASA JPL Asteroid team")
 ```
@@ -91,7 +89,7 @@ asteroid %>%
 The graph suggests, only 2 of the near earth asteroids are considered hazardous. 
 
 # Relationship
-To confirm the stated reltionship between the magnitude and hazardousness, here, I put them into the same plot.
+To confirm the stated relationship between the magnitude and hazardousness, here, I put them into the same plot.
 ```{r}
 asteroid %>%
   ggplot(aes(is_potentially_hazardous_asteroid, absolute_magnitude_h))+
@@ -101,10 +99,10 @@ asteroid %>%
        caption = "Source:NASA JPL Asteroid team")
 ```
 
-From the graph, it is true that all the hazardousness asteroids are below the absolute magnitude (H) of 22.0. But not all asteroids that are not considered hazarous are over the absolute magnitude (H) of 22.0, this is because some of the asteroids below the absolute magnitude (H) of 22.0 may not have a minimum orbit intersection distance (MOID) of 0.5 or less.
+From the graph, it is true that all the hazardousness asteroids are below the absolute magnitude (H) of 22.0. But not all asteroids that are not considered hazardous are over the absolute magnitude (H) of 22.0, this is because some of the asteroids below the absolute magnitude (H) of 22.0 may not have a minimum orbit intersection distance (MOID) of 0.5 or less.
 
 # Conclusion 
-Overall, we prove that the smaller absolute magnitude of an asteorid is, the more likely it is a potentially hazardous asteroid. This relationship can be identified in the graph below:
+Overall, we prove that the smaller absolute magnitude of an asteroid is, the more likely it is a potentially hazardous asteroid. This relationship can be identified in the graph below:
 ```{r}
 asteroid %>%
   mutate(is_potentially_hazardous_asteroid = as.numeric(is_potentially_hazardous_asteroid))%>% 
