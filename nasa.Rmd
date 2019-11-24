@@ -24,8 +24,8 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE,
                       fig.width = 6,
                       fig.asp = 0.618,
                       fig.align = "center",
-                      out.width = "50%",
-                      out.height = "50%")
+                      out.width = "70%",
+                      out.height = "70%")
 
 #load required packages
 library(tidyverse)
