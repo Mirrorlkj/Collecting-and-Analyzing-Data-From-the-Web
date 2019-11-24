@@ -1,0 +1,90 @@
+---
+title: "Exploring the gapminder data"
+author: "Kejing Li"
+date: "11/24/2019"
+output:
+  pdf_document:
+    toc: true
+    toc_depth: 2
+---
+# Relationship between population density and average life expectancy 
+```{r setup, include=FALSE}
+# Set global options
+# Hide all codes, messages and warnings
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE,
+# Set figure options for better display                      
+                      fig.width = 6, fig.asp = 0.618,
+                      fig.align = "center") 
+# Set numerical output display parameters
+options(width = 70, digits = 2, scipen = 7)
+
+#load required packages
+library(tidyverse)
+library(geonames)
+library(gapminder)
+library(countrycode)
+library(broom)
+library(modelr)
+library(knitr)
+
+#set default theme and modify the font size
+theme_set(theme_bw(base_size = 10))
+```
+
+```{r merge, include = FALSE, cache = TRUE}
+#get information from geonames, to do this you need first have an API key(here, an valid account name) in Rprofile 
+country_info <- GNcountryInfo() %>%
+  as_tibble()
+
+#unify the format of country name and the variable name to create a unique key for merging 
+country_info$countryCode <- countrycode(country_info$countryCode,
+                                        origin = "iso2c", 
+                                        destination = "country.name")
+country_info_merge <- country_info %>%
+  rename( "country"= "countryCode")
+
+
+#use left join to keep the observation of gapminder 
+data <-  gapminder %>%
+           left_join(country_info_merge, 
+                     by = "country") 
+
+#select and calculate variables for analysis
+gapminder_analysis <- data%>%
+  select("country","lifeExp","pop","areaInSqKm")%>%
+  mutate(areaInSqKm = as.numeric(areaInSqKm),
+         pop_density = pop/areaInSqKm)
+#rename variables in a consistent way
+colnames(gapminder_analysis) <- c("country", "life_exp","pop","area", "pop_density")
+```
+
+## 1.Graph 
+
+```{r graph}
+gapminder_analysis %>%
+  ggplot(aes(pop_density,life_exp))+
+  geom_point(alpha = .1)+
+  geom_smooth() +
+#zoom in to 0-500 because data are mostly clustered at small density values
+  scale_x_continuous(limits = c(0, 500))+
+  labs(x = "Population Density (per square kilometer)",
+       y = "Average Life Expectancy",
+       caption = "Source: Gapminder, GeoNames geographical database")
+```
+The graph suggests when population density is below around 100 million people/$km^2$, the average life expectancy seems to increase with the population density; when population density exceeds 100 million/$km^2$, there’s a weak relationship. 
+
+## 2. Model 
+To confirm the relationship, I fit a single variable linear regression model of the relationship between the population density and average life expectancy. The coefficient estimates are as follows:
+
+```{r model}
+# Fit a linear model for the data
+model <- lm(life_exp ~ pop_density, data = gapminder_analysis)
+# Find and display the model's estimates
+model_coef <- tidy(model, conf.int = TRUE) %>%
+# Change the labels
+mutate(term = recode(term, pop_density = "Population Density"))
+kable(model_coef)
+```
+
+
+Though the predictor has a low *p*-value, the coefficiency is only 0.01. Based on the model, population density may not be a good estimator for average life expectancy. 
