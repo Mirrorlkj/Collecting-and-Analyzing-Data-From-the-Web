@@ -1,0 +1,74 @@
+---
+title: "NASA - Near Earth Asteroid Information"
+author: "Kejing Li"
+date: "11/24/2019"
+output:
+  pdf_document:
+    toc: true
+    toc_depth: 2
+---
+# Introduction
+
+NeoWs (Near Earth Object Web Service) is a RESTful web service for near earth Asteroid information. With NeoWs a user can: search for Asteroids based on their closest approach date to Earth, lookup a specific Asteroid with its NASA JPL small body id, as well as browse the overall data-set.[^1] In this report, I use NeoWs API to get overall data-set of asteroids. And the analysis will be around two variables and how they related:
+
+- Magnitude of asteroids
+- Is potential hazardous asteroids
+
+```{r setup, include=FALSE}
+# Set global options
+# Hide all codes, messages and warnings
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE,
+# Set figure options for better display                      
+                      fig.width = 6,
+                      fig.asp = 0.618,
+                      fig.align = "center",
+                      out.width = "80%") 
+# Set numerical output display parameters
+options(width = 70, digits = 2, scipen = 7)
+
+
+#load required packages
+library(tidyverse)
+library(httr)
+library(broom)
+library(modelr)
+library(knitr)
+
+#set default theme and modify the font size
+theme_set(theme_bw(base_size = 10))
+```
+
+```{r}
+#get api key stored in the Rprofile
+nasa_key <- getOption("nasa_key")
+#browse the overall Asteroid data-set
+nasa <- GET("https://api.nasa.gov/neo/rest/v1/neo/browse?",
+            query = list(api_key = nasa_key))
+#remove links and pages which are of different length 
+asteroid <- content(nasa) %>%
+    list_modify(links = NULL,
+                page = NULL) %>%
+    as.tibble()
+
+#unnest the lists
+asteroid <- 
+  asteroid %>% unnest_wider(near_earth_objects)
+```
+
+# Overview 
+To get an overview of the near earth asteroids, I plot the distribution and number of magnitude and hazardousness seperately.
+ 
+## Magnitude 
+```{r}
+#count the magnitude
+asteroid %>%
+  ggplot()+
+  geom_freqpoly(aes(absolute_magnitude_h))+
+  labs(x = "Magnitude of asteroids",
+       y = "Number",
+       caption = "Source:NASA JPL Asteroid team")
+```
+
+## Hazardousness
+
+[^1]: “Asteroids - NeoWs API.” Nasa open data portal, July 19, 2018. https://data.nasa.gov/Space-Science/Asteroids-NeoWs-API/73uw-d9i8.
