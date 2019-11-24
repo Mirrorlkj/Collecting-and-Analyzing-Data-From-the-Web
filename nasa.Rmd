@@ -33,7 +33,7 @@ library(httr)
 library(modelr)
 
 #set default theme and modify the font size
-theme_set(theme_bw(base_size = 10))
+theme_set(theme_bw(base_size = 13))
 ```
 
 ```{r}
