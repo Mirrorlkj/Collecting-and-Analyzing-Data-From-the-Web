@@ -64,7 +64,7 @@ To get an overview of the near earth asteroids, I plot the distribution and numb
 asteroid %>%
   ggplot()+
   geom_freqpoly(aes(absolute_magnitude_h))+
-  labs(x = "Magnitude of asteroids",
+  labs(x = "Absolute Magnitude",
        y = "Number",
        caption = "Source:NASA JPL Asteroid team")
 ```
@@ -81,7 +81,7 @@ asteroid %>%
   ggplot(aes(is_potentially_hazardous_asteroid, n))+
   geom_col(width = 0.3)+
   geom_text(aes(label = n),vjust = "top", color= "white")+
-  labs(x = "Haphazardness of asteroids",
+  labs(x = "PHA (Potentially Hazardous Asteroid)",
        y = "Number",
        caption = "Source:NASA JPL Asteroid team")
 ```
