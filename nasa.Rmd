@@ -50,7 +50,9 @@ asteroid <- content(nasa) %>%
 
 #unnest the lists
 asteroid <- 
-  asteroid %>% unnest_wider(near_earth_objects)
+  asteroid %>% hoist(near_earth_objects,
+                     absolute_magnitude_h = "absolute_magnitude_h",
+                     is_potentially_hazardous_asteroid = "is_potentially_hazardous_asteroid")
 ```
 
 # Overview 
