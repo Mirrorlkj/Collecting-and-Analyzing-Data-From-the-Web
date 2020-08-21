@@ -1,7 +1,8 @@
-# hw08 Kejing Li
+# Collecting and Analyzing Data From the Web
+
 ## Introduction
 
-The assignment consists of two parts.
+The repo consists of two parts.
 
 * The first part focuses on exploring the relationship between population density and average life expectancy.
 * The second part uses the API to obtain Near Earth Asteroid Information from NASA and demonstrates the relationship between absolute magnitude and Potentially Hazardous Asteroid.
